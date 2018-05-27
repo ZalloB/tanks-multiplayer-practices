@@ -13,11 +13,17 @@ public class WebSocketClient : MonoBehaviour {
 	public string sender = "UnityTest";
 	public string location = "ws://localhost:8080/sample/chat/";
 	public string chatroom = "battlefield";
-	public Text board; 
+
+    public bool joined;
+
+	public Text board;
+    public Text nickname;
+    public Text message;
 
 	public Queue<ChatMessageDto> messages = new Queue<ChatMessageDto>();
 
 	void Start() {
+        joined = false;
 		ws = new WebSocket(location + chatroom);
 
 		ws.OnOpen += OnOpenHandler;
@@ -29,6 +35,9 @@ public class WebSocketClient : MonoBehaviour {
 	}
 
 	void Update() {
+
+        if (!joined)
+            return;
 		
 		while (messages.Count > 0) {
 			ChatMessageDto msg = messages.Dequeue();
@@ -41,7 +50,10 @@ public class WebSocketClient : MonoBehaviour {
 
 	public void Ping() {
 
-		ChatMessageDto msg = new ChatMessageDto ();
+        if (!joined)
+            return;
+
+        ChatMessageDto msg = new ChatMessageDto ();
 		msg.sender = sender;
 		msg.message = "Ping";
 		string msgJson = JsonUtility.ToJson(msg);
@@ -55,8 +67,9 @@ public class WebSocketClient : MonoBehaviour {
 	public void SendText() {
 
 		ChatMessageDto msg = new ChatMessageDto ();
-		msg.sender = sender;
-		string msgJson = JsonUtility.ToJson(msg);
+        msg.sender = nickname.text;
+        msg.message = message.text;
+        string msgJson = JsonUtility.ToJson(msg);
 
 		ws.SendAsync(msgJson, OnSendComplete);
 
@@ -70,11 +83,12 @@ public class WebSocketClient : MonoBehaviour {
 	}
 
 	void OnOpenHandler(object sender, System.EventArgs e) {
-		Debug.Log("WebSocket connected!");
+        joined = true;
+        Debug.Log("WebSocket connected!");
 	}
 
 	void OnMessageHandler(object sender, MessageEventArgs e) {
-		
+        joined = true;
 		string header = e.Data.Substring (2,"history".Length);
 		Debug.Log("WebSocket server said: "+header);
 
@@ -93,6 +107,7 @@ public class WebSocketClient : MonoBehaviour {
 	}
 
 	void OnCloseHandler(object sender, CloseEventArgs e) {
+        joined = false;
         Debug.Log(e);
         Debug.Log("WebSocket closed with reason: " + e.Reason);
 	}
@@ -101,7 +116,31 @@ public class WebSocketClient : MonoBehaviour {
 		Debug.Log("Message sent successfully? " + success);
 	}
 
+    private string DecorateColor(String user, string msg)
+    {
+        return "<color=" + GetColor(user) +">" + msg + "</color>" ;
+    }
 
+    private string GetColor(string code)
+    {
+        int hash = 0;
+
+        for (int i = 0; i < code.Length; i++)
+        {
+            hash = code[i] + ((hash << 5) - hash);
+        }
+
+        string colour = "#";
+
+        for (int i = 0; i < 3; i++)
+        {
+            int value = ((hash >> (i * 8)) & 0xff);
+            string hex = "00" + value.ToString("X");
+            colour += hex.Substring(hex.Length-2);
+        }
+
+        return colour;
+    }
 }
 
 [Serializable]
