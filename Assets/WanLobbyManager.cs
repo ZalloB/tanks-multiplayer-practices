@@ -2,65 +2,54 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 
-public class LevelManagerScript : MonoBehaviour {
+public class WanLobbyManager : MonoBehaviour {
 
-   // LobbyDiscovery discovery;
+    LobbyDiscovery discovery;
 
     void Awake()
     {
 
-       // discovery = FindObjectOfType<LobbyDiscovery>();
+        discovery = FindObjectOfType<LobbyDiscovery>();
     }
 
     void Start()
     {
-      //  StopDiscovery();
+
+        StopDiscovery();
     }
 
-
-    private void StopDiscovery()
+    public void RunServer()
     {
-
-        //if (discovery.running)
-       // {
-           // discovery.StopBroadcast();
-       // }
-    }
-
-    public void StartOffline()
-    {
-        SceneManager.LoadScene("CompleteMainScene");
-    }
-
-    public void StartLAN()
-    {
-        SceneManager.LoadScene("LanMain");
-    }
-
-    public void LoadScene(string nameScene)
-    {
-        SceneManager.LoadScene(nameScene);
+        StopDiscovery();
+        discovery.StartAsServer();
+        NetworkManager.singleton.StartServer();
     }
 
     public void CreateGame()
     {
 
-       // StopDiscovery();
-       // discovery.StartAsServer();
-       // NetworkManager.singleton.StartHost();
+        StopDiscovery();
+        discovery.StartAsServer();
+        NetworkManager.singleton.StartHost();
     }
 
     public void JoinGame()
     {
 
-       // StopDiscovery();
+        StopDiscovery();
         //discovery.StartAsClient();
-       // NetworkManager.singleton.StartClient();
+        NetworkManager.singleton.StartClient();
     }
 
+    private void StopDiscovery()
+    {
 
+        if (discovery.running)
+        {
+            discovery.StopBroadcast();
+        }
+    }
 
     private void AddressData()
     {
@@ -79,5 +68,3 @@ public class LevelManagerScript : MonoBehaviour {
         Debug.Log("//////////////");
     }
 }
-
-
