@@ -2,45 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
-public class LanBehaviour : NetworkBehaviour { 
+public class LanBehaviour : NetworkBehaviour {
 
     [SyncVar]
     internal int playerNumber;
 
     LobbyDiscovery discovery;
 
-
-    public int getPlayerNumber()
-    {
-        return playerNumber;
-    }
-    public void setPlayerNumber()
-    {
-        playerNumber++;
-    }
-
     void Awake()
     {
         discovery = FindObjectOfType<LobbyDiscovery>();
-    }
-
-
-    public void Start()
-    {
-        playerNumber = 0;
-    }
-
-
-    public void Update()
-    {
-        if(!GameObject.FindGameObjectWithTag("Blue") && playerNumber > 1)
-        {
-            //red wins
-        }else if(!GameObject.FindGameObjectWithTag("Red") && playerNumber > 1)
-        {
-            //blue wins
-        }
     }
 
 
@@ -67,5 +40,21 @@ public class LanBehaviour : NetworkBehaviour {
         {
             discovery.StopBroadcast();
         }
+    }
+
+
+    public int getPlayerNumber()
+    {
+        return playerNumber;
+    }
+
+    public void setPlayerNumber()
+    {
+        playerNumber++;
+    }
+
+    public override void OnStartClient()
+    {
+        GameObject.Find("GameBehaviour").GetComponent<LanBehaviour>().setPlayerNumber();
     }
 }
